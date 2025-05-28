@@ -1,0 +1,4 @@
+#README for project
+
+in this project we are just practising GITHUB actions and auto deploying our
+dockerized image to dockerhub
