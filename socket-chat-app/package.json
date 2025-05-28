@@ -1,0 +1,18 @@
+{
+  "name": "socket-chat-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker-build": "docker build -t socket-app .",
+    "docker-run": "docker run -d -p 3000:8080 socket-app"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  }
+}

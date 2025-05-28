@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>chat app</title>
+  </head>
+  <body>
+    <h2>MyChat <span id="userCount"></span></h2>
+
+    <div id="nick-name-container" style="border: solid 1px black; padding: 8px">
+      <input
+        type="text"
+        id="nickname"
+        placeholder="Enter your nickname"
+        required
+      />
+      <button type="submit" onclick="setNickname()">Submit</button>
+    </div>
+
+    <div style="display: flex; flex-direction: row; gap: 6px">
+      <div
+        id="users-online-container"
+        style="
+          flex: 1;
+          border: solid black 1px;
+          width: 150px;
+          height: 60vh;
+          margin-top: 8px;
+        "
+      >
+        <h4 style="margin: 6px 6px; border-bottom: 1px black solid">
+          Online users
+        </h4>
+        <div id="online-names"></div>
+      </div>
+
+      <div
+        id="messages-container"
+        style="
+          display: flex;
+          border: solid black 1px;
+          flex-direction: column;
+          margin-top: 8px;
+          flex: 4;
+        "
+      >
+        <div id="message-to-show" style="flex: 9"></div>
+        <div
+          id="message-input-container"
+          style="
+            display: flex;
+            flex: 1;
+            justify-content: space-between;
+            margin: 6px;
+          "
+        >
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Type a message..."
+            style="width: 70%"
+          />
+          <button type="button" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      let socket = io();
+
+      window.onload = () => socket.emit("new user");
+
+      // updates the total count of users in the chat
+      function updateUserCount(msg) {
+        console.log(msg);
+        if (msg.totalUsers) {
+          document.getElementById("userCount").innerText = `Users online: ${
+            msg.totalUsers || 0
+          }`;
+        }
+      }
+
+      let nickname = "";
+
+      function setNickname() {
+        const input = document.getElementById("nickname");
+        nickname = input.value.trim();
+        console.log("Nickname set to:", nickname);
+
+        socket.emit("set nickname", nickname);
+
+        if (nickname) {
+          const container = document.getElementById("nick-name-container");
+          container.innerHTML = `<strong>Nickname:</strong> ${nickname}`;
+        }
+      }
+
+      function sendMessage() {
+        const messageToServer = document
+          .getElementById("message-input")
+          .value.trim();
+        console.log("send message", messageToServer);
+        socket.emit("messages", messageToServer);
+      }
+
+      // SOCKET LISSENING
+      socket.on("new user", (msg) => {
+        updateUserCount(msg);
+      });
+      socket.on("disconnected", (msg) => {
+        updateUserCount(msg);
+      });
+      socket.on("set nickname", (msg) => {
+        const onlineNamesDiv = document.getElementById("online-names");
+        const nameElem = document.createElement("div");
+        nameElem.textContent = msg.nickname;
+        onlineNamesDiv.appendChild(nameElem);
+        console.log("nick name set", msg);
+      });
+
+      socket.on("messages", (msg) => {
+        const messagesContainer = document.getElementById("message-to-show");
+        const messageElem = document.createElement("div");
+        messageElem.textContent = `${msg.username}: ${msg.message}`;
+        messagesContainer.appendChild(messageElem);
+        console.log("what messages we get back");
+      });
+    </script>
+  </body>
+</html>
